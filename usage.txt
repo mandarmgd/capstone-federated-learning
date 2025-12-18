@@ -1,0 +1,32 @@
+federated_server_distributed.py - multi-task server + encryption (Fernet -> Symmetric-key encryption) + client selection
+utils/crypto_utils.py - Fernet AES encryption + serialization
+clients/client1_image.py - ECG images → feature extraction + XGBoost
+clients/client2_numerical.py - patient structured data → scaler + XGBoost
+clients/client3_audio.py - PCG audio → MFCC + fuzzy InfFS + XGBoost
+
+how to run distributed (locally): 
+
+T1 -> py -m clients.client1_node 
+T2 -> py -m clients.client2_node 
+T3 -> py -m clients.client3_node 
+T4 -> py federated_server_distributed.py (for training -> saves federated_multitask_pipelines_distributed.pkl)
+T4 -> py run_demo_files.py
+
+inference_server_files.py - local helper for files. 
+
+# Here is what the final project would look like (kind of)
+
+1. Collect data from the three clients in their respective forms 
+2. Models now get trained, once that is done it gives a brief insight into their evaluations after three rounds  
+3. Now, the server can input data into whatever clients it has chosen for the process
+4. Personalized outputs
+
+Explainability was implemented modality-specifically.
+For ECG images, spatial explainability was achieved using Grad-CAM over CNN feature maps.
+For tabular metadata and audio signals, feature-level and class-semantic explainability was preferred over per-sample SHAP due to stability, interpretability, and federated constraints.
+These explanations were integrated into a local LLM-based personalization engine.
+
+The thresholds used for explainability were not intended to represent clinical decision boundaries. 
+Instead, they serve as heuristic saliency groupings, consistent with prior work in explainable machine learning for healthcare. 
+These thresholds were chosen to provide stable, interpretable abstractions of model behavior while preserving privacy constraints inherent to federated learning systems.
+

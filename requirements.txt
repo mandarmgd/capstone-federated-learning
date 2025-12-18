@@ -1,0 +1,42 @@
+# Core scientific stack
+numpy
+pandas
+scipy
+
+# Machine learning
+scikit-learn
+xgboost
+imbalanced-learn
+joblib
+
+# Deep learning (for InceptionV3, ResNet50 via keras.applications)
+tensorflow
+keras
+
+# Image processing
+opencv-python
+scikit-image
+
+# Audio processing
+librosa
+soundfile
+
+# Feature selection
+PyIFS
+scikit-fuzzy
+
+# Visualization (if you still plot confusion matrices / metrics)
+matplotlib
+seaborn
+
+# Encryption
+cryptography
+
+# distributed FL
+fastapi
+uvicorn
+pydantic
+
+# personalization 
+llama-cpp-python
+shap

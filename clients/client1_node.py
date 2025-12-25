@@ -10,7 +10,7 @@ import joblib
 from utils.crypto_utils import CryptoBox
 from clients.client1_image import Client1FL
 
-# Use the SAME key you use in federated_server_mt.py
+# Use the SAME key as the server
 SHARED_KEY = b'u61MxLVa1ly2OqZ_TH11PHWSKTCRXmQ2cZndR3XxMsM='
 crypto = CryptoBox(SHARED_KEY)
 

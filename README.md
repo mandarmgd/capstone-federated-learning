@@ -197,7 +197,7 @@ Risk probabilities from selected modalities are aggregated at the decision level
 ## Repository Structure
 
 ```
-CVD_new3/
+capstone-federated-learning/
 ├── clients/
 │   ├── __init__.py
 │   ├── client1_image.py

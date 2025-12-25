@@ -16,7 +16,7 @@ crypto = CryptoBox(SHARED_KEY)
 
 app = FastAPI(title="ECG Client Node")
 
-# Pipeline kept in memory; you can also persist with joblib if you like
+# Pipeline kept in memory
 current_pipeline = None
 
 

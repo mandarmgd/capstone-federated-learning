@@ -1,4 +1,4 @@
-
+8
 
 # Distributed Multi-Task Federated Learning for Cardiovascular Risk Assessment (for the elderly)
 
@@ -298,5 +298,3 @@ The system is not intended for clinical diagnosis or direct medical decision-mak
 For academic and research use only.
 
 ---
-
-* or produce a viva/interview-ready explanation aligned exactly to this README

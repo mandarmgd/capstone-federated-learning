@@ -1,5 +1,3 @@
-8
-
 # Distributed Multi-Task Federated Learning for Cardiovascular Risk Assessment (for the elderly)
 
 ## Overview

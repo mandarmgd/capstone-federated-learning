@@ -252,7 +252,7 @@ capstone-federated-learning/
 
 ### Start Client Nodes
 
-Each client runs as an independent FastAPI service.
+Each client runs as an independent FastAPI service. (separate terminals)
 
 ```
 python -m clients.client1_node

@@ -25,7 +25,7 @@ soundfile
 PyIFS
 scikit-fuzzy
 
-# Visualization (if you still plot confusion matrices / metrics)
+# Visualization (in case I want to plot confusion matrices / metrics)
 matplotlib
 seaborn
 

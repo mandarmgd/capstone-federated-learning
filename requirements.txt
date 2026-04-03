@@ -4,9 +4,9 @@ pandas
 scipy
 
 # Machine learning
-scikit-learn
+scikit-learn==1.6.1
 xgboost
-imbalanced-learn
+imbalanced-learn==0.13.0
 joblib
 
 # Deep learning (for InceptionV3, ResNet50 via keras.applications)
@@ -38,5 +38,4 @@ uvicorn
 pydantic
 
 # personalization 
-llama-cpp-python
-shap
+llama-cpp-python==0.2.24 

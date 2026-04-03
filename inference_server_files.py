@@ -13,7 +13,7 @@ from keras._tf_keras.keras.applications.inception_v3 import InceptionV3
 from keras._tf_keras.keras.applications.resnet50 import ResNet50
 from sklearn.preprocessing import StandardScaler
 
-# 🔹 Explainability + LLM (ADDED)
+# Explainability + LLM
 from explainability.ecg_explainer import explain_ecg
 from explainability.audio_explainer import explain_audio
 from explainability.meta_explainer import explain_meta
@@ -26,9 +26,20 @@ _pipelines_cache = None
 _inception = None
 _resnet = None
 
-# 🔹 Lazy-load LLM engine (ADDED)
+# Lazy-load LLM engine (ADDED)
 _llm_engine = None
 
+# -----------------------------------------------------
+# Temperature Scaling for Probability Calibration
+# -----------------------------------------------------
+def temperature_scale(p: float, T: float) -> float:
+    """
+    Apply temperature scaling to a probability.
+    T > 1  -> soften (reduce overconfidence)
+    T < 1  -> sharpen (increase confidence)
+    """
+    p = float(np.clip(p, 1e-6, 1 - 1e-6))
+    return (p ** (1.0 / T)) / ((p ** (1.0 / T)) + ((1 - p) ** (1.0 / T)))
 
 def get_llm_engine():
     global _llm_engine
@@ -160,7 +171,7 @@ def predict_ecg_from_image(image_path: str):
 
 
 # ---------------------------------------------------------------------
-# AUDIO + META (UNCHANGED)
+# AUDIO + META
 # ---------------------------------------------------------------------
 
 def _extract_audio_features(file_path: str) -> np.ndarray:
@@ -189,13 +200,17 @@ def _prepare_audio_features(wav_path: str):
 
     return X_final, audio_pipe
 
-
 def predict_audio_from_wav(wav_path: str):
     X_final, audio_pipe = _prepare_audio_features(wav_path)
     model = audio_pipe["model"]
-    proba = model.predict_proba(X_final)[0, 1]
-    return float(proba), int(proba >= 0.5)
 
+    probs = model.predict_proba(X_final)[0]
+
+    # normal = index 0, all others are pathological
+    risk_prob = float(probs[1] + probs[2] + probs[3])
+    risk_label = int(risk_prob >= 0.5)
+
+    return risk_prob, risk_label
 
 def predict_meta_from_features(meta_vector: np.ndarray):
     pipes = load_pipelines()
@@ -228,9 +243,16 @@ def combined_prediction(option: int,
 
     pipes = load_pipelines()
 
+    # -------- Temperature values (tunable, documented) --------
+    T_ECG = 1.5      # soften ECG confidence
+    T_META = 1.3     # soften metadata confidence
+    T_AUDIO = 0.8    # sharpen audio confidence
+
+
     if option in (1, 4, 5, 7) and ecg_image_path is not None:
         ecg_out = predict_ecg_from_image(ecg_image_path)
-        probs.append(ecg_out["risk_prob"])
+        ecg_p = temperature_scale(ecg_out["risk_prob"], T_ECG)
+        probs.append(ecg_p)
         modalities.append("ecg")
         explanations.append(
             explain_ecg(ecg_image_path, pipes["ecg"], ecg_out)
@@ -238,6 +260,7 @@ def combined_prediction(option: int,
 
     if option in (2, 4, 6, 7) and meta_features is not None:
         p_meta, _ = predict_meta_from_features(meta_features)
+        p_meta = temperature_scale(p_meta, T_META)
         probs.append(p_meta)
         modalities.append("meta")
         explanations.append(
@@ -246,6 +269,7 @@ def combined_prediction(option: int,
 
     if option in (3, 5, 6, 7) and audio_wav_path is not None:
         p_audio, _ = predict_audio_from_wav(audio_wav_path)
+        p_audio = temperature_scale(p_audio, T_AUDIO)
         probs.append(p_audio)
         modalities.append("audio")
         explanations.append(
@@ -259,7 +283,7 @@ def combined_prediction(option: int,
     risk_label = int(avg_prob >= 0.5)
 
     # =====================================================
-    # 🔒 CRITICAL FIX: TRIM EXPLANATIONS BEFORE LLM
+    # CRITICAL FIX: TRIM EXPLANATIONS BEFORE LLM
     # =====================================================
     MAX_EXPLANATIONS = 3
     MAX_CHARS_PER_EXPLANATION = 800
@@ -287,4 +311,3 @@ def combined_prediction(option: int,
         "modal_explanations": trimmed_explanations,
         "personalized_explanation": personalized_text
     }
-
